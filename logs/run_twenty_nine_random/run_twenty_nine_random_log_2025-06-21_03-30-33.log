@@ -1,0 +1,39 @@
+
+==============================
+  29 Random Agent Match
+==============================
+
+==============================
+  Starting New Round
+==============================
+
+--- Game Update ---
+  -> --- New Round Started --- Dealer is Player 0 ---
+  -> Current Match Score: Team 0 (0,2): 0, Team 1 (1,3): 0
+  -> Player 1 attempts action: 28
+
+--- Game Update ---
+  -> Player 2 attempts action: 29
+
+--- Game Update ---
+  -> Player 3 attempts action: pass
+
+--- Game Update ---
+  -> Player 0 attempts action: pass
+
+--- Game Update ---
+  -> Player 1 attempts action: pass
+  -> Bidding finished. Player 2 wins with a bid of 29.
+
+--- Game Update ---
+  -> Player 2 attempts action: H
+  -> Player 2 chose H as the trump suit (secretly).
+
+--- Game Update ---
+  -> Player 1 attempts action: CJ
+
+--- Game Update ---
+  -> Player 2 attempts action: C10
+
+--- Game Update ---
+  -> Player 3 attempts action: CK
