@@ -72,8 +72,8 @@ if __name__ == '__main__':
         raise
 
     print_header("DQN Training on Twenty-Nine (5 layers, 100 episodes)")
-    num_episodes = 100
-    eval_every = 20
+    num_episodes = 10000
+    eval_every = 100
     eval_num = 100
 
     for episode in range(num_episodes):

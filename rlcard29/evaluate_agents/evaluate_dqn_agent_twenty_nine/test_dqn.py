@@ -28,6 +28,7 @@ def main():
 
     try:
         env = rlcard.make('twenty_nine')
+        print("Environment created successfully")
     except Exception as e:
         print(f"Error creating twenty_nine environment: {e}")
         raise
@@ -38,6 +39,9 @@ def main():
             np.ndarray,
             np._core.multiarray._reconstruct,
             np.dtypes.Int64DType,
+            np.dtype,
+            np._core.multiarray.scalar,
+            np.dtypes.Float64DType
         ])
     except AttributeError as e:
         print(f"Error setting safe globals: {e}")
@@ -46,11 +50,13 @@ def main():
     try:
         checkpoint = torch.load(model_path, weights_only=True, map_location=device)
         dqn_agent = DQNAgent.from_checkpoint(checkpoint=checkpoint)
+        print("DQN agent loaded successfully")
     except Exception as e:
         print(f"Error loading checkpoint with weights_only=True: {e}")
         try:
             checkpoint = torch.load(model_path, weights_only=False, map_location=device)
             dqn_agent = DQNAgent.from_checkpoint(checkpoint=checkpoint)
+            print("DQN agent loaded with weights_only=False")
         except Exception as e2:
             print(f"Failed to load checkpoint: {e2}")
             raise
@@ -58,12 +64,15 @@ def main():
     try:
         random_agent = RandomAgent(num_actions=env.num_actions)
         env.set_agents([dqn_agent, random_agent, random_agent, random_agent])
+        print("Agents set successfully")
     except Exception as e:
         print(f"Error setting agents: {e}")
         raise
 
     print("Starting tournament: DQN agent vs. three Random agents...")
     try:
+        state, player_id = env.reset()
+        print(f"Initial state raw_legal_actions: {state['raw_legal_actions']}")
         rewards = tournament(env, 1000)
         print("\nTournament Results:")
         print("="*20)
@@ -84,7 +93,9 @@ def main():
             payoffs = [0] * env.num_players
             num_games = 1000
             for game in range(num_games):
-                env.reset()
+                state, _ = env.reset()
+                if game == 0:
+                    print(f"First game raw_legal_actions: {state['raw_legal_actions']}")
                 while not env.is_over():
                     player_id = env.get_player_id()
                     state = env.get_state(player_id)

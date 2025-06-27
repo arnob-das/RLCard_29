@@ -30,18 +30,19 @@ class TwentyNineEnv(Env):
             except Exception as e:
                 print(f"Error encoding card {card}: {e}")
         obs[0:32] = hand_cards
-        legal_actions = self._get_legal_actions_id(state.get('legal_actions', []))
+        raw_legal_actions = state.get('legal_actions', [])
+        legal_actions = self._get_legal_actions_id(raw_legal_actions)
         action_mask = np.zeros(self.action_num, dtype=int)
         for action_id in legal_actions.keys():
             action_mask[action_id] = 1
         obs[32:32+self.action_num] = action_mask
-        obs[32+self.action_num] = state.get('bid_value', 0)
+        obs[0] = state.get('bid_value', 0)  # Fixed indexing bug
         return {
             'obs': obs,
             'legal_actions': legal_actions,
             'raw_obs': state,
-            'raw_legal_actions': state.get('legal_actions', []),
-        }
+            'raw_legal_actions': raw_legal_actions  # Ensure consistency
+        }                                                                       
 
     def _get_legal_actions_id(self, legal_actions):
         legal_actions_ids = {}
@@ -59,15 +60,17 @@ class TwentyNineEnv(Env):
         else:
             return decode_card(action_id)
 
-    def _encode_action(self, action_str):
-        if action_str == 'pass':
+    def _encode_action(self, action):
+        if isinstance(action, int):
+            return action
+        if action == 'pass':
             return 46
-        elif action_str in ['S', 'H', 'D', 'C']:
-            return {'S': 47, 'H': 48, 'D': 49, 'C': 50}[action_str]
-        elif action_str.isdigit():
-            return int(action_str) + 16
+        elif action in ['S', 'H', 'D', 'C']:
+            return {'S': 47, 'H': 48, 'D': 49, 'C': 50}[action]
+        elif isinstance(action, str) and action.isdigit():
+            return int(action) + 16
         else:
-            return encode_card(action_str)
+            return encode_card(action)
 
     def _get_payoffs(self):
         return self.game.get_payoffs()
