@@ -1,3 +1,9 @@
+"""
+File: rlcard29/trainer/dqn_agent_trainer_twenty_nine/dqn_trainer_for_twenty_nine.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard
 from rlcard.agents import RandomAgent, DQNAgent
 from rlcard.utils import reorganize, get_device

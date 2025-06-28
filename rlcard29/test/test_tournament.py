@@ -1,3 +1,9 @@
+"""
+File: rlcard29/test/test_tournament.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard
 import rlcard29
 from rlcard.agents import RandomAgent

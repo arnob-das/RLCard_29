@@ -1,3 +1,9 @@
+"""
+File: rlcard29/games/twenty_nine/utils.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 # Utility functions for the 29 card game
 
 SUITS = ['S', 'H', 'D', 'C']  # Spades, Hearts, Diamonds, Clubs

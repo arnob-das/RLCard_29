@@ -1,3 +1,9 @@
+"""
+File: rlcard29/play/play_with_random_agent/run_twenty_nine_random.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard
 from rlcard.agents import RandomAgent
 import rlcard29

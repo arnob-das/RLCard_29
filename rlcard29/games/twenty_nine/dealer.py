@@ -1,3 +1,9 @@
+"""
+File: rlcard29/games/twenty_nine/dealer.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import random
 from rlcard29.games.twenty_nine.utils import get_deck
 

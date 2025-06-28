@@ -1,3 +1,10 @@
+"""
+File: rlcard29/envs/twenty_nine.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+
+    
 import numpy as np
 from rlcard.envs import Env
 from rlcard29.games.twenty_nine.game import TwentyNineGame

@@ -1,3 +1,9 @@
+"""
+File: rlcard29/agents/human_agent_twenty_nine/human_agent.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+
 import random
 
 def _print_state(state):

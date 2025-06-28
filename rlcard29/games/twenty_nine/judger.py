@@ -1,3 +1,9 @@
+"""
+File: rlcard29/games/twenty_nine/judger.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 from rlcard29.games.twenty_nine.utils import get_card_points
 
 class Judger:

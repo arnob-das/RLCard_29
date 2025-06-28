@@ -1,3 +1,9 @@
+"""
+File: rlcard29/__init__.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 from rlcard.envs.registration import register
 from .envs.twenty_nine import TwentyNineEnv
 

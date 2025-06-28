@@ -1,3 +1,9 @@
+"""
+File: rlcard29/trainer/cfr_agent_trainer_twenty_nine/run_twenty_nine_cfr.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard29
 from rlcard.agents.random_agent import RandomAgent
 from rlcard29.envs.twenty_nine import TwentyNineEnv

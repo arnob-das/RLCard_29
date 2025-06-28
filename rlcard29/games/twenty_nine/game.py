@@ -1,3 +1,9 @@
+"""
+File: rlcard29/games/twenty_nine/game.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import random
 from rlcard29.games.twenty_nine.dealer import Dealer
 from rlcard29.games.twenty_nine.player import Player

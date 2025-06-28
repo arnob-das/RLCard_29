@@ -1,3 +1,9 @@
+"""
+File: rlcard29/games/twenty_nine/player.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 from rlcard29.games.twenty_nine.utils import encode_card, decode_card
 
 class Player:

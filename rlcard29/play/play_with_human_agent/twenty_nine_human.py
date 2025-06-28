@@ -1,3 +1,9 @@
+"""
+File: rlcard29/play/play_with_human_agent/twenty_nine_human.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard
 import rlcard29
 from rlcard.agents import RandomAgent

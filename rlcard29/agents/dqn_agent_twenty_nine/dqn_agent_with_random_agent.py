@@ -1,3 +1,9 @@
+"""
+File: rlcard29/agents/dqn_agent_twenty_nine/dqn_agent_with_random_agent.py
+Author: Arnob Das
+Date: 2025-06-28
+"""
+    
 import rlcard
 from rlcard.agents import RandomAgent,DQNAgent
 import rlcard29
