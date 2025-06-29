@@ -1,23 +1,13 @@
-"""
-File: rlcard29/trainer/dqn_agent_trainer_twenty_nine/test_dqn_trainer_file.py
-Author: Arnob Das
-Date: 2025-06-28
-"""
-    
+import rlcard
+from rlcard.agents import RandomAgent, DQNAgent
+from rlcard.utils import reorganize, get_device
 import os
 import sys
 from datetime import datetime
-import rlcard
-from rlcard.agents import RandomAgent, DQNAgent
-from rlcard.utils import get_device, tournament
 import torch
 import numpy as np
-import traceback
-try:
-    import rlcard29
-except ImportError as e:
-    print(f"Error importing rlcard29: {e}")
-    raise
+import matplotlib.pyplot as plt
+import rlcard29
 
 class Logger:
     def __init__(self, log_dir, file_name):
@@ -25,9 +15,11 @@ class Logger:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
         self.log = open(os.path.join(log_dir, file_name), "a")
+
     def write(self, message):
         self.terminal.write(message)
         self.log.write(message)
+
     def flush(self):
         self.terminal.flush()
         self.log.flush()
@@ -37,116 +29,131 @@ def print_header(message):
     print(f"  {message}")
     print("="*30)
 
+def plot_metrics(win_rates, losses, save_dir, timestamp, dqn_wins_total, random_wins_total):
+    # Ensure the save directory exists
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Plot win rate
+    plt.figure(figsize=(10, 5))
+    plt.plot(win_rates, label='Win Rate (Team 0)')
+    plt.xlabel('Evaluation Episode')
+    plt.ylabel('Win Rate')
+    plt.title('DQN Agent Win Rate Over Time')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(os.path.join(save_dir, f'win_rate_{timestamp}.png'))
+    plt.close()
+
+    # Plot loss
+    plt.figure(figsize=(10, 5))
+    plt.plot(losses, label='Training Loss')
+    plt.xlabel('Training Step')
+    plt.ylabel('Loss')
+    plt.title('DQN Training Loss')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig(os.path.join(save_dir, f'loss_curve_{timestamp}.png'))
+    plt.close()
+
+    # Plot bar chart for total wins
+    plt.figure(figsize=(8, 5))
+    agents = ['DQN Agent', 'Random Agents']
+    wins = [dqn_wins_total, random_wins_total]
+    plt.bar(agents, wins, color=['blue', 'orange'])
+    plt.xlabel('Agent Type')
+    plt.ylabel('Number of Wins')
+    plt.title('Total Wins in 100 Episodes')
+    plt.savefig(os.path.join(save_dir, f'wins_bar_chart_{timestamp}.png'))
+    plt.close()
+
 if __name__ == '__main__':
     log_dir = "rlcard29/logs/train_log/dqn_model_train_log"
     save_dir = "rlcard29/models/dqn_model_twenty_nine"
+    plot_dir = "rlcard29/plots"
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     log_file = f"run_twenty_nine_dqn_log_{timestamp}.log"
-    os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Logger(log_dir, log_file)
 
-    try:
-        device = get_device()
-        print(f"Using device: {device}")
-    except Exception as e:
-        print(f"Error getting device: {e}")
-        raise
+    # Check for available device
+    device = get_device()
+    print(f"Using device: {device}")
 
-    try:
-        env = rlcard.make('twenty_nine')
-        eval_env = rlcard.make('twenty_nine')
-        print("Twenty-Nine environment created successfully.")
-    except Exception as e:
-        print(f"Error creating twenty_nine environment: {e}")
-        raise
+    env = rlcard.make('twenty_nine')
+    eval_env = rlcard.make('twenty_nine')
 
     hidden_layers = [128, 128, 128, 128, 128]
+
     state_shape = env.state_shape[0]
-    try:
-        dqn_agent = DQNAgent(
-            num_actions=env.num_actions,
-            state_shape=state_shape,
-            mlp_layers=hidden_layers,
-            device=device
-        )
-        random_agent = RandomAgent(num_actions=env.num_actions)
-        env.set_agents([dqn_agent, random_agent, random_agent, random_agent])
-        eval_env.set_agents([dqn_agent, random_agent, random_agent, random_agent])
-        print("Agents initialized successfully.")
-    except Exception as e:
-        print(f"Error initializing agents: {e}")
-        raise
+    dqn_agent = DQNAgent(
+        num_actions=env.action_num,
+        state_shape=state_shape,
+        mlp_layers=hidden_layers,
+        device=device
+    )
+    random_agent = RandomAgent(num_actions=env.action_num)
+    env.set_agents([dqn_agent, random_agent, random_agent, random_agent])
+    eval_env.set_agents([dqn_agent, random_agent, random_agent, random_agent])
 
-    print_header("DQN Training on Twenty-Nine (5 layers, 100 episodes)")
-    num_episodes = 10000
-    eval_every = 100
+    print_header("DQN Training on 29 (5 layers, 100 episodes)")
+    num_episodes = 100
+    eval_every = 10
     eval_num = 100
-
+    
+    # Track metrics
+    win_rates = []
+    losses = []
+    dqn_wins_total = 0
+    random_wins_total = 0
+    
     for episode in range(num_episodes):
-        try:
-            state, player_id = env.reset()
-            while not env.is_over():
-                action = env.agents[player_id].step(state)
-                next_state, next_player_id = env.step(action)
-                if player_id == 0:
-                    payoffs = env.get_payoffs()
-                    print(f"DEBUG: get_payoffs() returned {payoffs}, type: {type(payoffs)}")
-                    if not isinstance(payoffs, (list, tuple, np.ndarray)):
-                        print(f"Warning: get_payoffs() returned {type(payoffs)}: {payoffs}")
-                        payoffs = [payoffs if i == 0 else 0 for i in range(env.num_players)]
-                    reward = payoffs[player_id]
-                    transition = (state, action, reward, next_state, env.is_over())
-                    dqn_agent.feed(transition)
-                state, player_id = next_state, next_player_id
-            if (episode + 1) % eval_every == 0:
-                print(f"\nEpisode {episode+1}/{num_episodes} - Evaluating...")
-                try:
-                    rewards = tournament(eval_env, eval_num)
-                    print(f"DEBUG: tournament returned {rewards}, type: {type(rewards)}")
-                    print(f"DQN reward: {rewards[0]}, Random avg: {(rewards[1] + rewards[2] + rewards[3]) / 3}")
-                except Exception as e:
-                    print(f"Evaluation failed: {e}")
-                    print("Stack trace:")
-                    traceback.print_exc()
-                    print("Falling back to custom tournament loop...")
-                    try:
-                        payoffs = [0] * eval_env.num_players
-                        for game in range(eval_num):
-                            print(f"Evaluating game {game+1}/{eval_num}")
-                            eval_env.reset()
-                            print(f"Game {game+1}: Reset complete")
-                            while not eval_env.is_over():
-                                player_id = eval_env.get_player_id()
-                                state = eval_env.get_state(player_id)
-                                print(f"Game {game+1}: Player {player_id}, State: {state}")
-                                action = eval_env.agents[player_id].step(state)
-                                print(f"Game {game+1}: Player {player_id}, Action: {action}")
-                                eval_env.step(action)
-                                print(f"Game {game+1}: Step complete")
-                            _p = eval_env.get_payoffs()
-                            print(f"DEBUG: Game {game+1}/{eval_num}, get_payoffs() returned {_p}, type: {type(_p)}")
-                            for i in range(len(payoffs)):
-                                payoffs[i] += _p[i]
-                        rewards = [p / eval_num for p in payoffs]
-                        print(f"DEBUG: tournament returned {rewards}, type: {type(rewards)}")
-                        print(f"DQN reward: {rewards[0]}, Random avg: {(rewards[1] + rewards[2] + rewards[3]) / 3}")
-                    except Exception as e2:
-                        print(f"Custom tournament failed: {e2}")
-                        print("Stack trace:")
-                        traceback.print_exc()
-                        raise
-        except Exception as e:
-            print(f"Error in episode {episode+1}: {e}")
-            print("Stack trace:")
-            traceback.print_exc()
-            raise
+        state, player_id = env.reset()
+        
+        while True:
+            action = env.agents[player_id].step(state)
+            next_state, next_player_id = env.step(action)
+            done = env.is_over()
+            
+            # Reorganize the trajectory for the DQN agent
+            if player_id == 0:  # If it was the DQN agent's turn
+                reward = env.get_payoffs()[player_id]
+                transition = (state, action, reward, next_state, done)
+                loss = dqn_agent.feed(transition)
+                if loss is not None and loss > 0:  # Ensure meaningful loss values
+                    losses.append(float(loss))
+            
+            state = next_state
+            player_id = next_player_id
 
+            if done:
+                break
+        
+        if (episode + 1) % eval_every == 0:
+            print(f"\nEpisode {episode+1}/{num_episodes} - Evaluating...")
+            # Evaluation
+            wins = 0
+            for _ in range(eval_num):
+                state, player_id = eval_env.reset()
+                while True:
+                    action = eval_env.agents[player_id].step(state)
+                    state, player_id = eval_env.step(action)
+                    if eval_env.is_over():
+                        payoffs = eval_env.get_payoffs()
+                        if payoffs[0] > 0:  # DQN agent (team 0) wins
+                            wins += 1
+                        break
+            win_rate = wins / eval_num
+            win_rates.append(win_rate)
+            print(f"Win Rate: {win_rate:.3f} ({wins}/{eval_num} games)")
+            dqn_wins_total += wins
+            random_wins_total += (eval_num - wins)  # Assuming random agents win the rest
+    
     print("\nTraining complete.")
+    
+    # Save plots
+    plot_metrics(win_rates, losses, plot_dir, timestamp, dqn_wins_total, random_wins_total)
+    print(f"Plots saved to {plot_dir}")
 
-    try:
-        os.makedirs(save_dir, exist_ok=True)
-        dqn_agent.save_checkpoint(save_dir, 'checkpoint_dqn.pt')
-        print(f"Model saved to {save_dir}/checkpoint_dqn.pt")
-    except Exception as e:
-        print(f"Error saving checkpoint: {e}")
-        raise
+    # Save the trained model
+    os.makedirs(save_dir, exist_ok=True)
+    dqn_agent.save_checkpoint(save_dir)
+    print(f"Model saved to {save_dir}")
